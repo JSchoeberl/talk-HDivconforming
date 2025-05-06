@@ -1,0 +1,448 @@
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+    ~~~~~~~~~^
+        nb,
+        ^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/nbclient/client.py", line 1319, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+        cell, index, execution_count=self.code_cells_executed + 1
+    )
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+gfsol.Load("fsisol4.sol")
+
+scene = Draw(mesh.MaterialCF( {"fluid" :gfu}, default=None), mesh.Materials("fluid"), \
+             deformation=gfd, order=3)
+
+t = 3
+tend=4
+SetNumThreads(4)
+with TaskManager():
+    while t < tend-tau/2.0:
+        t += tau
+        print("\rt = ", t, end="")
+    
+        gfsolold.vec.data = gfsol.vec
+
+        for step in range(3):
+            gfset.Set(gfsol.components[3])
+            a.AssembleLinearization(gfsol.vec)
+            inv = a.mat.Inverse(a.space.FreeDofs(a.condense), inverse=inverse)
+            a.Apply (gfsol.vec, res)
+            
+            if a.condense:
+                res.data += a.harmonic_extension_trans * res
+            w.data = inv*res
+            if a.condense:
+                w.data += a.harmonic_extension * w
+                w.data += a.inner_solve * res
+            err = InnerProduct(w, res)
+            # print ("err^2 = ", err)
+                                                
+            gfsol.vec.data -= w
+            
+            if abs(err) < 1e-20:
+                break;
+            
+        scene.Redraw()
+  
+# gfsol.Save("fsisol4.sol")
+------------------
+
+----- stdout -----
+t =  3.005
+----- stdout -----
+t =  3.01
+----- stdout -----
+t =  3.0149999999999997
+----- stdout -----
+t =  3.0199999999999996
+----- stdout -----
+t =  3.0249999999999995
+----- stdout -----
+t =  3.0299999999999994
+----- stdout -----
+t =  3.0349999999999993
+----- stdout -----
+t =  3.039999999999999
+----- stdout -----
+t =  3.044999999999999
+----- stdout -----
+t =  3.049999999999999
+----- stdout -----
+t =  3.054999999999999
+----- stdout -----
+t =  3.0599999999999987
+----- stdout -----
+t =  3.0649999999999986
+----- stdout -----
+t =  3.0699999999999985
+----- stdout -----
+t =  3.0749999999999984
+----- stdout -----
+t =  3.0799999999999983
+----- stdout -----
+t =  3.084999999999998
+----- stdout -----
+t =  3.089999999999998
+----- stdout -----
+t =  3.094999999999998
+----- stdout -----
+t =  3.099999999999998
+----- stdout -----
+t =  3.1049999999999978
+----- stdout -----
+t =  3.1099999999999977
+----- stdout -----
+t =  3.1149999999999975
+----- stdout -----
+t =  3.1199999999999974
+----- stdout -----
+t =  3.1249999999999973
+----- stdout -----
+t =  3.1299999999999972
+----- stdout -----
+t =  3.134999999999997
+----- stdout -----
+t =  3.139999999999997
+----- stdout -----
+t =  3.144999999999997
+----- stdout -----
+t =  3.149999999999997
+----- stdout -----
+t =  3.1549999999999967
+----- stdout -----
+t =  3.1599999999999966
+----- stdout -----
+t =  3.1649999999999965
+----- stdout -----
+t =  3.1699999999999964
+----- stdout -----
+t =  3.1749999999999963
+----- stdout -----
+t =  3.179999999999996
+----- stdout -----
+t =  3.184999999999996
+----- stdout -----
+t =  3.189999999999996
+----- stdout -----
+t =  3.194999999999996
+----- stdout -----
+t =  3.1999999999999957
+----- stdout -----
+t =  3.2049999999999956
+----- stdout -----
+t =  3.2099999999999955
+----- stdout -----
+t =  3.2149999999999954
+----- stdout -----
+t =  3.2199999999999953
+----- stdout -----
+t =  3.224999999999995
+----- stdout -----
+t =  3.229999999999995
+----- stdout -----
+t =  3.234999999999995
+----- stdout -----
+t =  3.239999999999995
+----- stdout -----
+t =  3.2449999999999948
+----- stdout -----
+t =  3.2499999999999947
+----- stdout -----
+t =  3.2549999999999946
+----- stdout -----
+t =  3.2599999999999945
+----- stdout -----
+t =  3.2649999999999944
+----- stdout -----
+t =  3.2699999999999942
+----- stdout -----
+t =  3.274999999999994
+----- stdout -----
+t =  3.279999999999994
+----- stdout -----
+t =  3.284999999999994
+----- stdout -----
+t =  3.289999999999994
+----- stdout -----
+t =  3.2949999999999937
+----- stdout -----
+t =  3.2999999999999936
+----- stdout -----
+t =  3.3049999999999935
+----- stdout -----
+t =  3.3099999999999934
+----- stdout -----
+t =  3.3149999999999933
+----- stdout -----
+t =  3.319999999999993
+----- stdout -----
+t =  3.324999999999993
+----- stdout -----
+t =  3.329999999999993
+----- stdout -----
+t =  3.334999999999993
+----- stdout -----
+t =  3.3399999999999928
+----- stdout -----
+t =  3.3449999999999926
+----- stdout -----
+t =  3.3499999999999925
+----- stdout -----
+t =  3.3549999999999924
+----- stdout -----
+t =  3.3599999999999923
+----- stdout -----
+t =  3.364999999999992
+----- stdout -----
+t =  3.369999999999992
+----- stdout -----
+t =  3.374999999999992
+----- stdout -----
+t =  3.379999999999992
+----- stdout -----
+t =  3.384999999999992
+----- stdout -----
+t =  3.3899999999999917
+----- stdout -----
+t =  3.3949999999999916
+----- stdout -----
+t =  3.3999999999999915
+----- stdout -----
+t =  3.4049999999999914
+----- stdout -----
+t =  3.4099999999999913
+----- stdout -----
+t =  3.414999999999991
+----- stdout -----
+t =  3.419999999999991
+----- stdout -----
+t =  3.424999999999991
+----- stdout -----
+t =  3.429999999999991
+----- stdout -----
+t =  3.4349999999999907
+----- stdout -----
+t =  3.4399999999999906
+----- stdout -----
+t =  3.4449999999999905
+----- stdout -----
+t =  3.4499999999999904
+----- stdout -----
+t =  3.4549999999999903
+----- stdout -----
+t =  3.45999999999999
+----- stdout -----
+t =  3.46499999999999
+----- stdout -----
+t =  3.46999999999999
+----- stdout -----
+t =  3.47499999999999
+----- stdout -----
+t =  3.4799999999999898
+----- stdout -----
+t =  3.4849999999999897
+----- stdout -----
+t =  3.4899999999999896
+----- stdout -----
+t =  3.4949999999999894
+----- stdout -----
+t =  3.4999999999999893
+----- stdout -----
+t =  3.5049999999999892
+----- stdout -----
+t =  3.509999999999989
+----- stdout -----
+t =  3.514999999999989
+----- stdout -----
+t =  3.519999999999989
+----- stdout -----
+t =  3.524999999999989
+----- stdout -----
+t =  3.5299999999999887
+----- stdout -----
+t =  3.5349999999999886
+----- stdout -----
+t =  3.5399999999999885
+----- stdout -----
+t =  3.5449999999999884
+----- stdout -----
+t =  3.5499999999999883
+----- stdout -----
+t =  3.554999999999988
+----- stdout -----
+t =  3.559999999999988
+----- stdout -----
+t =  3.564999999999988
+----- stdout -----
+t =  3.569999999999988
+----- stdout -----
+t =  3.5749999999999877
+----- stdout -----
+t =  3.5799999999999876
+----- stdout -----
+t =  3.5849999999999875
+----- stdout -----
+t =  3.5899999999999874
+----- stdout -----
+t =  3.5949999999999873
+----- stdout -----
+t =  3.599999999999987
+----- stdout -----
+t =  3.604999999999987
+----- stdout -----
+t =  3.609999999999987
+----- stdout -----
+t =  3.614999999999987
+----- stdout -----
+t =  3.619999999999987
+----- stdout -----
+t =  3.6249999999999867
+----- stdout -----
+t =  3.6299999999999866
+----- stdout -----
+t =  3.6349999999999865
+----- stdout -----
+t =  3.6399999999999864
+----- stdout -----
+t =  3.6449999999999863
+----- stdout -----
+t =  3.649999999999986
+----- stdout -----
+t =  3.654999999999986
+----- stdout -----
+t =  3.659999999999986
+----- stdout -----
+t =  3.664999999999986
+----- stdout -----
+t =  3.6699999999999857
+----- stdout -----
+t =  3.6749999999999856
+----- stdout -----
+t =  3.6799999999999855
+----- stdout -----
+t =  3.6849999999999854
+----- stdout -----
+t =  3.6899999999999853
+----- stdout -----
+t =  3.694999999999985
+----- stdout -----
+t =  3.699999999999985
+----- stdout -----
+t =  3.704999999999985
+----- stdout -----
+t =  3.709999999999985
+----- stdout -----
+t =  3.7149999999999848
+----- stdout -----
+t =  3.7199999999999847
+----- stdout -----
+t =  3.7249999999999845
+----- stdout -----
+t =  3.7299999999999844
+----- stdout -----
+t =  3.7349999999999843
+----- stdout -----
+t =  3.7399999999999842
+----- stdout -----
+t =  3.744999999999984
+----- stdout -----
+t =  3.749999999999984
+----- stdout -----
+t =  3.754999999999984
+----- stdout -----
+t =  3.759999999999984
+----- stdout -----
+t =  3.7649999999999837
+----- stdout -----
+t =  3.7699999999999836
+----- stdout -----
+t =  3.7749999999999835
+----- stdout -----
+t =  3.7799999999999834
+----- stdout -----
+t =  3.7849999999999833
+----- stdout -----
+t =  3.789999999999983
+----- stdout -----
+t =  3.794999999999983
+----- stdout -----
+t =  3.799999999999983
+----- stdout -----
+t =  3.804999999999983
+----- stdout -----
+t =  3.8099999999999827
+----- stdout -----
+t =  3.8149999999999826
+----- stdout -----
+t =  3.8199999999999825
+----- stdout -----
+t =  3.8249999999999824
+----- stdout -----
+t =  3.8299999999999823
+----- stdout -----
+t =  3.834999999999982
+----- stdout -----
+t =  3.839999999999982
+----- stdout -----
+t =  3.844999999999982
+----- stdout -----
+t =  3.849999999999982
+----- stdout -----
+t =  3.8549999999999818
+----- stdout -----
+t =  3.8599999999999817
+----- stdout -----
+t =  3.8649999999999816
+----- stdout -----
+t =  3.8699999999999815
+----- stdout -----
+t =  3.8749999999999813
+----- stdout -----
+t =  3.8799999999999812
+----- stdout -----
+t =  3.884999999999981
+----- stdout -----
+t =  3.889999999999981
+----- stderr -----
+/Applications/Netgen.app/Contents/Resources/lib/python3.13/site-packages/netgen/webgui.py:20: RuntimeWarning: overflow encountered in cast
+  values = np.array(data.flatten(), dtype=dtype)
+----- stdout -----
+t =  3.894999999999981
+----- stdout -----
+t =  3.899999999999981
+------------------
+
+[31m---------------------------------------------------------------------------[39m
+[31mNgException[39m                               Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[3][39m[32m, line 18[39m
+[32m     16[39m [38;5;28;01mfor[39;00m step [38;5;129;01min[39;00m [38;5;28mrange[39m([32m3[39m):
+[32m     17[39m     gfset.Set(gfsol.components[[32m3[39m])
+[32m---> [39m[32m18[39m     [43ma[49m[43m.[49m[43mAssembleLinearization[49m[43m([49m[43mgfsol[49m[43m.[49m[43mvec[49m[43m)[49m
+[32m     19[39m     inv = a.mat.Inverse(a.space.FreeDofs(a.condense), inverse=inverse)
+[32m     20[39m     a.Apply (gfsol.vec, res)
+
+[31mNgException[39m: Inverse matrix: Matrix singularin AssembleLinearization
+
+
+

@@ -1,0 +1,1202 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>16. Fluid-Structure-interaction &#8212; H(div)-based Navier-Stokes</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'advanced/FSI';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="11. N.-St. on moving domains" href="morphing.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../talk_WIAS.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">H(div)-based Navier-Stokes</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../talk_WIAS.html">
+                    H(div)-based Finite Element Methods  for the Navier-Stokes Equations
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Methods</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../theory/spacehdiv.html">1. The Function Space <span class="math notranslate nohighlight">\(H(\operatorname{div})\)</span></a></li>
+
+<li class="toctree-l1"><a class="reference internal" href="../theory/HDGmethods.html">3. Hybrid Discontinuous Galerkin  (HDG) methods for elliptic equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/HDGStokes.html">4. H(<span class="math notranslate nohighlight">\(\operatorname{div}\)</span>)-conforming HDG methods for Stokes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/HDG-Navier-Stokes.html">5. Navier Stokes Equations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory/MCS.html">6. Mass Conserving Mixed Stress Method (MCS)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Model templates</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../modeltemplates/natconv.html">7. Natural Convection</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Various projects</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../turbulence/turbulence.html">8. Turbulence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parallelstokes.html">9. Solving Stokes, in parallel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SurfaceSchaeferTurek.html">10. H(div)-conforming Navier-Stokes mon Surfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="morphing.html">11. N.-St. on moving domains</a></li>
+
+
+
+
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">16. Fluid-Structure-interaction</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/JSchoeberl/talk-HDivconforming" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/advanced/FSI.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Fluid-Structure-interaction</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="fluid-structure-interaction">
+<h1><span class="section-number">16. </span>Fluid-Structure-interaction<a class="headerlink" href="#fluid-structure-interaction" title="Link to this heading">#</a></h1>
+<p>Michael Neunteufel + JS ‘21</p>
+<ul class="simple">
+<li><p>coupling of non-linear elasticity and Navier-Stokes on moving domain</p></li>
+<li><p>strong coupling of velocities via Lagrange parameter</p></li>
+<li><p>mesh deformation keeps div-free functions div-free</p></li>
+<li><p>Piola transform causes another term like mesh-velocity</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">netgen.geom2d</span><span class="w"> </span><span class="kn">import</span> <span class="n">CSG2d</span><span class="p">,</span> <span class="n">Circle</span><span class="p">,</span> <span class="n">Rectangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ngsolve</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ngsolve.webgui</span><span class="w"> </span><span class="kn">import</span> <span class="n">Draw</span>
+
+<span class="n">tau</span>     <span class="o">=</span> <span class="mf">0.005</span>
+<span class="n">tend</span>    <span class="o">=</span> <span class="mf">5.5</span>
+<span class="n">order</span>   <span class="o">=</span> <span class="mi">3</span>
+<span class="n">alpha</span>   <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">inverse</span> <span class="o">=</span> <span class="s2">&quot;umfpack&quot;</span>
+<span class="n">truecompile</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">rhos</span><span class="p">,</span> <span class="n">nus</span><span class="p">,</span> <span class="n">mus</span><span class="p">,</span> <span class="n">rhof</span><span class="p">,</span> <span class="n">nuf</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1e4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="o">*</span><span class="mf">1e6</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ls</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">mus</span><span class="o">*</span><span class="n">nus</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">nus</span><span class="p">)</span>
+
+<span class="n">uinflow</span> <span class="o">=</span> <span class="n">CF</span><span class="p">(</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">U</span><span class="o">*</span><span class="mf">1.5</span><span class="o">*</span><span class="n">y</span><span class="o">*</span><span class="p">(</span><span class="mf">0.41</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">0.41</span><span class="o">*</span><span class="mf">0.41</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">GenerateMesh</span><span class="p">(</span><span class="n">order</span><span class="p">,</span> <span class="n">maxh</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mf">0.41</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+    <span class="n">geo</span> <span class="o">=</span> <span class="n">CSG2d</span><span class="p">()</span>
+    <span class="n">circle</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">(</span> <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span><span class="mf">0.2</span><span class="p">),</span> <span class="n">radius</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">bc</span><span class="o">=</span><span class="s2">&quot;circ&quot;</span> <span class="p">)</span>
+    <span class="n">fluid</span>  <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span> <span class="n">pmin</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">pmax</span><span class="o">=</span><span class="p">(</span><span class="n">L</span><span class="p">,</span><span class="n">H</span><span class="p">),</span> <span class="n">mat</span><span class="o">=</span><span class="s2">&quot;fluid&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="s2">&quot;inlet&quot;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s2">&quot;wall&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="s2">&quot;wall&quot;</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="s2">&quot;outlet&quot;</span> <span class="p">)</span>
+    <span class="n">solid</span>  <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span> <span class="n">pmin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.248989794855664</span><span class="p">,</span><span class="mf">0.19</span><span class="p">),</span> <span class="n">pmax</span><span class="o">=</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.21</span><span class="p">),</span> <span class="n">mat</span><span class="o">=</span><span class="s2">&quot;solid&quot;</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="s2">&quot;circ_inner&quot;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="s2">&quot;interface&quot;</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="s2">&quot;interface&quot;</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="s2">&quot;interface&quot;</span> <span class="p">)</span>
+    
+    <span class="n">domain_fluid</span> <span class="o">=</span> <span class="p">(</span><span class="n">fluid</span> <span class="o">-</span> <span class="n">circle</span><span class="p">)</span> <span class="o">-</span> <span class="n">solid</span>
+    <span class="n">domain_solid</span> <span class="o">=</span> <span class="p">(</span><span class="n">solid</span> <span class="o">-</span> <span class="n">circle</span><span class="p">)</span>
+    <span class="n">geo</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">domain_fluid</span><span class="p">)</span>
+    <span class="n">geo</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">domain_solid</span><span class="p">)</span>
+
+    <span class="c1"># generate mesh</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">GenerateMesh</span><span class="p">(</span><span class="n">maxh</span><span class="o">=</span><span class="n">maxh</span><span class="p">))</span>
+    <span class="n">mesh</span><span class="o">.</span><span class="n">Curve</span><span class="p">(</span><span class="n">order</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">mesh</span>
+
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">GenerateMesh</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+<span class="n">Draw</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+<span class="n">V1</span> <span class="o">=</span> <span class="n">VectorH1</span><span class="p">(</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">dirichlet</span> <span class="o">=</span> <span class="s2">&quot;wall|outlet|inlet|circ|circ_inner&quot;</span> <span class="p">)</span>
+<span class="n">V2</span> <span class="o">=</span> <span class="n">HDiv</span><span class="p">(</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">dirichlet</span> <span class="o">=</span> <span class="s2">&quot;wall|inlet|circ|circ_inner&quot;</span><span class="p">,</span> <span class="n">definedon</span> <span class="o">=</span> <span class="s2">&quot;fluid&quot;</span><span class="p">,</span> <span class="n">hodivfree</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+<span class="n">V3</span> <span class="o">=</span> <span class="n">TangentialFacetFESpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">dirichlet</span><span class="o">=</span><span class="s2">&quot;wall|inlet|circ|circ_inner|outlet&quot;</span><span class="p">,</span> <span class="n">definedon</span> <span class="o">=</span> <span class="s2">&quot;fluid&quot;</span> <span class="p">)</span>
+<span class="n">V4</span> <span class="o">=</span> <span class="n">VectorH1</span><span class="p">(</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">dirichlet</span><span class="o">=</span><span class="s2">&quot;circ|circ_inner&quot;</span><span class="p">,</span> <span class="n">definedon</span> <span class="o">=</span> <span class="s2">&quot;solid&quot;</span> <span class="p">)</span>
+<span class="n">Q</span>  <span class="o">=</span> <span class="n">L2</span><span class="p">(</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">definedon</span> <span class="o">=</span> <span class="s2">&quot;fluid&quot;</span><span class="p">,</span> <span class="n">lowest_order_wb</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+<span class="n">V5</span> <span class="o">=</span> <span class="n">SurfaceL2</span><span class="p">(</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">dirichlet</span><span class="o">=</span><span class="s2">&quot;wall|outlet|inlet|circ|circ_inner&quot;</span> <span class="p">)</span>
+
+<span class="n">V</span> <span class="o">=</span> <span class="n">V2</span><span class="o">*</span><span class="n">V3</span><span class="o">*</span><span class="n">Q</span><span class="o">*</span><span class="n">V1</span><span class="o">*</span><span class="n">V4</span><span class="o">*</span><span class="n">V5</span><span class="o">*</span><span class="n">V5</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">V2</span><span class="o">*</span><span class="n">V3</span><span class="o">*</span><span class="n">Q</span>
+<span class="n">H</span> <span class="o">=</span> <span class="n">VectorH1</span><span class="p">(</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span> <span class="n">dirichlet</span> <span class="o">=</span> <span class="s2">&quot;wall|inlet|outlet|circ|circ_inner&quot;</span> <span class="p">)</span>
+              
+<span class="n">u</span><span class="p">,</span> <span class="n">uhat</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">fx</span><span class="p">,</span> <span class="n">fy</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">TrialFunction</span><span class="p">()</span>
+<span class="n">ut</span><span class="p">,</span><span class="n">uhatt</span><span class="p">,</span><span class="n">pt</span><span class="p">,</span><span class="n">dt</span><span class="p">,</span><span class="n">vt</span><span class="p">,</span><span class="n">fxt</span><span class="p">,</span><span class="n">fyt</span> <span class="o">=</span> <span class="n">V</span><span class="o">.</span><span class="n">TestFunction</span><span class="p">()</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ft</span> <span class="o">=</span> <span class="n">CF</span><span class="p">(</span> <span class="p">(</span><span class="n">fx</span><span class="p">,</span><span class="n">fy</span><span class="p">)</span> <span class="p">),</span> <span class="n">CF</span><span class="p">(</span> <span class="p">(</span><span class="n">fxt</span><span class="p">,</span><span class="n">fyt</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="n">gfsol</span>     <span class="o">=</span> <span class="n">GridFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="c1">#solution</span>
+<span class="n">gfsolold</span>  <span class="o">=</span> <span class="n">GridFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span> <span class="c1">#oldsolution</span>
+<span class="n">gfset</span>     <span class="o">=</span> <span class="n">GridFunction</span><span class="p">(</span><span class="n">H</span><span class="p">)</span> <span class="c1">#for SetDeformation</span>
+        
+<span class="n">gfu</span><span class="p">,</span> <span class="n">gfvelhat</span><span class="p">,</span> <span class="n">pressure</span><span class="p">,</span> <span class="n">gfd</span><span class="p">,</span> <span class="n">gfv</span><span class="p">,</span> <span class="n">gffx</span><span class="p">,</span> <span class="n">gffy</span> <span class="o">=</span> <span class="n">gfsol</span><span class="o">.</span><span class="n">components</span>
+<span class="n">uold</span><span class="p">,</span> <span class="n">uhatold</span><span class="p">,</span> <span class="n">pold</span><span class="p">,</span> <span class="n">dold</span><span class="p">,</span> <span class="n">vold</span><span class="p">,</span> <span class="n">fxold</span><span class="p">,</span> <span class="n">fyold</span> <span class="o">=</span> <span class="n">gfsolold</span><span class="o">.</span><span class="n">components</span>
+
+<span class="n">I</span> <span class="o">=</span> <span class="n">Id</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">dim</span><span class="p">)</span>
+<span class="n">F</span> <span class="o">=</span> <span class="n">grad</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="n">I</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">trans</span><span class="o">*</span><span class="n">F</span>
+<span class="n">Fold</span> <span class="o">=</span> <span class="n">grad</span><span class="p">(</span><span class="n">dold</span><span class="p">)</span> <span class="o">+</span> <span class="n">I</span>
+<span class="n">Cold</span> <span class="o">=</span> <span class="n">Fold</span><span class="o">.</span><span class="n">trans</span><span class="o">*</span><span class="n">Fold</span>
+
+
+<span class="n">n</span><span class="p">,</span><span class="n">h</span> <span class="o">=</span> <span class="n">specialcf</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="n">specialcf</span><span class="o">.</span><span class="n">mesh_size</span>
+        
+<span class="k">def</span><span class="w"> </span><span class="nf">tang</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">vec</span> <span class="o">-</span> <span class="p">(</span><span class="n">vec</span><span class="o">*</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">n</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">norma</span><span class="p">(</span><span class="n">vec</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">vec</span><span class="o">*</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">n</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">Stress</span><span class="p">(</span><span class="n">mat</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">mus</span><span class="o">*</span><span class="n">mat</span><span class="o">+</span><span class="n">ls</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="n">Trace</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span><span class="o">*</span><span class="n">I</span>
+
+
+<span class="c1">#For Stokes problem</span>
+<span class="n">stokes</span> <span class="o">=</span> <span class="n">BilinearForm</span><span class="p">(</span> <span class="n">Y</span><span class="p">,</span> <span class="n">symmetric</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">check_unused</span><span class="o">=</span><span class="kc">False</span> <span class="p">)</span>
+<span class="n">stokes</span> <span class="o">+=</span> <span class="p">(</span><span class="n">nuf</span><span class="o">*</span><span class="n">rhof</span><span class="o">*</span><span class="n">InnerProduct</span><span class="p">(</span> <span class="mi">2</span><span class="o">*</span><span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span> <span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">ut</span><span class="p">)))</span> \
+           <span class="o">-</span> <span class="n">div</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">*</span><span class="n">pt</span> <span class="o">-</span> <span class="n">div</span><span class="p">(</span><span class="n">ut</span><span class="p">)</span><span class="o">*</span><span class="n">p</span> <span class="o">-</span> <span class="mf">1e-8</span><span class="o">*</span><span class="n">p</span><span class="o">*</span><span class="n">pt</span> <span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="p">(</span><span class="s2">&quot;fluid&quot;</span><span class="p">)</span>
+<span class="n">stokes</span> <span class="o">+=</span> <span class="p">(</span><span class="n">nuf</span><span class="o">*</span><span class="n">rhof</span><span class="o">*</span><span class="p">(</span><span class="n">InnerProduct</span><span class="p">(</span> <span class="mi">2</span><span class="o">*</span><span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="n">tang</span><span class="p">(</span><span class="n">uhatt</span><span class="o">-</span><span class="n">ut</span><span class="p">)</span> <span class="p">)</span> \
+                     <span class="o">+</span><span class="n">InnerProduct</span><span class="p">(</span> <span class="mi">2</span><span class="o">*</span><span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">ut</span><span class="p">))</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="n">tang</span><span class="p">(</span><span class="n">uhat</span><span class="o">-</span><span class="n">u</span><span class="p">)</span> <span class="p">)</span> \
+                     <span class="o">+</span><span class="n">alpha</span><span class="o">*</span><span class="n">order</span><span class="o">*</span><span class="n">order</span><span class="o">/</span><span class="n">h</span> <span class="o">*</span> <span class="n">InnerProduct</span><span class="p">(</span> <span class="n">tang</span><span class="p">(</span><span class="n">uhatt</span><span class="o">-</span><span class="n">ut</span><span class="p">),</span> <span class="n">tang</span><span class="p">(</span><span class="n">uhat</span><span class="o">-</span><span class="n">u</span><span class="p">)</span> <span class="p">)))</span> \
+            <span class="o">*</span><span class="n">dx</span><span class="p">(</span><span class="s2">&quot;fluid&quot;</span><span class="p">,</span> <span class="n">element_boundary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">stokes</span><span class="o">.</span><span class="n">Assemble</span><span class="p">()</span>
+
+
+<span class="c1">######################################### SOLID #############################################</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">BilinearForm</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check_unused</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">condense</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">+=</span> <span class="p">(</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span><span class="o">*</span><span class="p">(</span><span class="n">d</span><span class="o">-</span><span class="n">dold</span><span class="p">)</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">+</span><span class="n">vold</span><span class="p">))</span><span class="o">*</span><span class="n">dt</span> <span class="o">+</span><span class="n">rhos</span><span class="o">/</span><span class="n">tau</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="n">vold</span><span class="p">)</span><span class="o">*</span><span class="n">vt</span> <span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">InnerProduct</span><span class="p">(</span><span class="n">F</span><span class="o">*</span><span class="n">Stress</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">C</span><span class="o">+</span><span class="n">Cold</span><span class="p">)</span><span class="o">-</span><span class="n">I</span><span class="p">)),</span> <span class="n">grad</span><span class="p">(</span><span class="n">vt</span><span class="p">))</span> <span class="p">)</span><span class="o">.</span><span class="n">Compile</span><span class="p">(</span><span class="n">truecompile</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="p">(</span><span class="s2">&quot;solid&quot;</span><span class="p">)</span>
+
+<span class="n">factor</span> <span class="o">=</span> <span class="mf">1e-22</span><span class="o">*</span><span class="n">mus</span>
+<span class="n">gfdist</span> <span class="o">=</span> <span class="n">GridFunction</span><span class="p">(</span><span class="n">H1</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">minCF</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span> <span class="n">IfPos</span><span class="p">(</span><span class="n">a</span><span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+<span class="n">gfdist</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span> <span class="n">minCF</span><span class="p">(</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mf">0.6</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="mf">0.19</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mf">0.6</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="mf">0.21</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">NeoHookExt</span> <span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">lam</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">mu</span> <span class="o">*</span> <span class="p">(</span><span class="n">Trace</span><span class="p">(</span><span class="n">C</span><span class="o">-</span><span class="n">I</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">mu</span><span class="o">/</span><span class="n">lam</span> <span class="o">*</span> <span class="n">Det</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">lam</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">mu</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">+=</span> <span class="n">Variation</span><span class="p">(</span> <span class="n">factor</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gfdist</span><span class="o">*</span><span class="n">gfdist</span><span class="o">+</span><span class="mf">1e-12</span><span class="p">)</span><span class="o">*</span><span class="n">NeoHookExt</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="p">(</span><span class="s2">&quot;fluid&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">Compile</span><span class="p">(</span><span class="n">truecompile</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1">################################# FLUID ##############################################</span>
+<span class="n">graddp</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">-</span><span class="n">grad</span><span class="p">(</span><span class="n">dold</span><span class="p">))</span>
+<span class="n">relv</span> <span class="o">=</span> <span class="n">u</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span><span class="o">*</span><span class="p">(</span><span class="n">d</span><span class="o">-</span><span class="n">dold</span><span class="p">)</span>
+<span class="n">relvn</span> <span class="o">=</span> <span class="n">relv</span><span class="o">*</span><span class="n">n</span>
+<span class="n">upwind</span> <span class="o">=</span> <span class="p">(</span><span class="n">u</span><span class="o">*</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">n</span> <span class="o">+</span> <span class="p">(</span><span class="n">IfPos</span><span class="p">(</span><span class="n">relvn</span><span class="p">,</span> <span class="n">tang</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">tang</span><span class="p">(</span><span class="n">uhat</span><span class="p">)))</span>
+
+<span class="n">cfinner</span> <span class="o">=</span> <span class="n">nuf</span><span class="o">*</span><span class="n">rhof</span><span class="o">*</span><span class="n">InnerProduct</span><span class="p">(</span><span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">))</span><span class="o">+</span><span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">uold</span><span class="p">)),</span><span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">ut</span><span class="p">)))</span> <span class="o">-</span> <span class="n">div</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">*</span><span class="n">pt</span><span class="o">-</span><span class="n">div</span><span class="p">(</span><span class="n">ut</span><span class="p">)</span><span class="o">*</span><span class="n">p</span> <span class="o">-</span><span class="n">rhof</span><span class="o">*</span><span class="n">InnerProduct</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">+</span><span class="n">uold</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">ut</span><span class="p">)</span><span class="o">.</span><span class="n">trans</span><span class="o">*</span><span class="n">relv</span><span class="p">)</span> <span class="o">+</span> <span class="n">rhof</span><span class="o">*</span><span class="n">InnerProduct</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">graddp</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">+</span><span class="n">uold</span><span class="p">),</span><span class="n">ut</span><span class="p">)</span> <span class="o">+</span> <span class="n">rhof</span><span class="o">/</span><span class="n">tau</span><span class="o">*</span><span class="p">(</span><span class="n">u</span><span class="o">-</span><span class="n">uold</span><span class="p">)</span><span class="o">*</span><span class="n">ut</span>
+<span class="n">cfouter</span> <span class="o">=</span> <span class="n">nuf</span><span class="o">*</span><span class="n">rhof</span><span class="o">*</span><span class="p">(</span><span class="n">InnerProduct</span><span class="p">(</span><span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">)</span><span class="o">+</span><span class="n">grad</span><span class="p">(</span><span class="n">uold</span><span class="p">))</span><span class="o">*</span><span class="n">n</span><span class="p">,</span><span class="n">tang</span><span class="p">(</span><span class="n">uhatt</span><span class="o">-</span><span class="n">ut</span><span class="p">))</span> <span class="o">+</span> <span class="n">InnerProduct</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">Sym</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">ut</span><span class="p">))</span><span class="o">*</span><span class="n">n</span><span class="p">,</span><span class="mf">0.5</span><span class="o">*</span><span class="n">tang</span><span class="p">(</span><span class="n">uhat</span><span class="o">-</span><span class="n">u</span> <span class="o">+</span> <span class="n">uhatold</span><span class="o">-</span><span class="n">uold</span><span class="p">))</span> <span class="o">+</span> <span class="n">alpha</span><span class="o">*</span><span class="n">order</span><span class="o">*</span><span class="n">order</span><span class="o">/</span><span class="n">h</span><span class="o">*</span><span class="n">InnerProduct</span><span class="p">(</span><span class="n">tang</span><span class="p">(</span><span class="n">uhatt</span><span class="o">-</span><span class="n">ut</span><span class="p">),</span><span class="mf">0.5</span><span class="o">*</span><span class="n">tang</span><span class="p">(</span><span class="n">uhat</span><span class="o">-</span><span class="n">u</span><span class="o">+</span><span class="n">uhatold</span><span class="o">-</span><span class="n">uold</span><span class="p">)))</span><span class="o">+</span><span class="n">rhof</span><span class="o">*</span><span class="p">(</span><span class="n">relvn</span><span class="o">*</span><span class="n">upwind</span><span class="o">*</span><span class="n">ut</span><span class="o">+</span><span class="n">IfPos</span><span class="p">(</span><span class="n">relvn</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="o">*</span><span class="n">relvn</span><span class="o">*</span><span class="n">tang</span><span class="p">(</span><span class="n">uhat</span><span class="o">-</span><span class="n">u</span><span class="o">+</span><span class="n">uhatold</span><span class="o">-</span><span class="n">uold</span><span class="p">)</span><span class="o">*</span><span class="n">uhatt</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">+=</span> <span class="n">cfinner</span><span class="o">.</span><span class="n">Compile</span><span class="p">(</span><span class="n">truecompile</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="p">(</span><span class="s2">&quot;fluid&quot;</span><span class="p">,</span><span class="n">deformation</span><span class="o">=</span><span class="n">gfset</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">+=</span> <span class="n">cfouter</span><span class="o">.</span><span class="n">Compile</span><span class="p">(</span><span class="n">truecompile</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span><span class="p">(</span><span class="s2">&quot;fluid&quot;</span><span class="p">,</span><span class="n">element_boundary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">deformation</span><span class="o">=</span><span class="n">gfset</span><span class="p">)</span>
+<span class="c1">#interface</span>
+<span class="n">a</span> <span class="o">+=</span> <span class="p">((</span><span class="n">norma</span><span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="n">u</span><span class="o">.</span><span class="n">Trace</span><span class="p">())</span><span class="o">+</span><span class="n">tang</span><span class="p">(</span><span class="n">v</span><span class="o">-</span><span class="n">uhat</span><span class="o">.</span><span class="n">Trace</span><span class="p">()))</span><span class="o">*</span><span class="n">ft</span> <span class="o">+</span> <span class="p">(</span><span class="n">norma</span><span class="p">(</span><span class="n">vt</span><span class="o">-</span><span class="n">ut</span><span class="o">.</span><span class="n">Trace</span><span class="p">())</span><span class="o">+</span><span class="n">tang</span><span class="p">(</span><span class="n">vt</span><span class="o">-</span><span class="n">uhatt</span><span class="o">.</span><span class="n">Trace</span><span class="p">()))</span><span class="o">*</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">Compile</span><span class="p">(</span><span class="n">truecompile</span><span class="p">,</span><span class="kc">True</span><span class="p">)</span><span class="o">*</span><span class="n">ds</span><span class="p">(</span><span class="s2">&quot;interface&quot;</span><span class="p">,</span> <span class="n">deformation</span><span class="o">=</span><span class="n">gfset</span><span class="p">)</span>
+        
+
+<span class="n">bts</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">FreeDofs</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">Y</span><span class="o">.</span><span class="n">GetDofs</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">Materials</span><span class="p">(</span><span class="s2">&quot;solid&quot;</span><span class="p">))</span>
+<span class="n">bts</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">Y</span><span class="o">.</span><span class="n">GetDofs</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">Boundaries</span><span class="p">(</span><span class="s2">&quot;wall|inlet|circ|interface|circ_inner&quot;</span><span class="p">))</span>
+<span class="n">invstoke</span> <span class="o">=</span> <span class="n">stokes</span><span class="o">.</span><span class="n">mat</span><span class="o">.</span><span class="n">Inverse</span><span class="p">(</span><span class="n">bts</span><span class="p">,</span> <span class="n">inverse</span> <span class="o">=</span> <span class="s2">&quot;umfpack&quot;</span><span class="p">)</span>
+
+<span class="n">tmp</span> <span class="o">=</span> <span class="n">GridFunction</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+<span class="n">rstokes</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">CreateVector</span><span class="p">()</span>
+<span class="n">tmp</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span> <span class="n">uinflow</span><span class="p">,</span> <span class="n">definedon</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">Boundaries</span><span class="p">(</span><span class="s2">&quot;inlet&quot;</span><span class="p">)</span> <span class="p">)</span>
+<span class="n">rstokes</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">stokes</span><span class="o">.</span><span class="n">mat</span><span class="o">*</span><span class="n">tmp</span><span class="o">.</span><span class="n">vec</span>
+<span class="n">tmp</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">data</span> <span class="o">-=</span> <span class="n">invstoke</span><span class="o">*</span><span class="n">rstokes</span>
+<span class="n">gfsol</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">vec</span>
+<span class="n">gfsol</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">vec</span>
+<span class="n">gfsol</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">vec</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="n">gfsol</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">CreateVector</span><span class="p">()</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">gfsol</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">CreateVector</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "24bc13884d56449f90bd311aaaf7ab16"}</script></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gfsol</span><span class="o">.</span><span class="n">Load</span><span class="p">(</span><span class="s2">&quot;fsisol4.sol&quot;</span><span class="p">)</span>
+
+<span class="n">scene</span> <span class="o">=</span> <span class="n">Draw</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">MaterialCF</span><span class="p">(</span> <span class="p">{</span><span class="s2">&quot;fluid&quot;</span> <span class="p">:</span><span class="n">gfu</span><span class="p">},</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="n">mesh</span><span class="o">.</span><span class="n">Materials</span><span class="p">(</span><span class="s2">&quot;fluid&quot;</span><span class="p">),</span> \
+             <span class="n">deformation</span><span class="o">=</span><span class="n">gfd</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">tend</span><span class="o">=</span><span class="mi">4</span>
+<span class="n">SetNumThreads</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">TaskManager</span><span class="p">():</span>
+    <span class="k">while</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">tend</span><span class="o">-</span><span class="n">tau</span><span class="o">/</span><span class="mf">2.0</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">+=</span> <span class="n">tau</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">t = &quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    
+        <span class="n">gfsolold</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">gfsol</span><span class="o">.</span><span class="n">vec</span>
+
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">gfset</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="n">gfsol</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">AssembleLinearization</span><span class="p">(</span><span class="n">gfsol</span><span class="o">.</span><span class="n">vec</span><span class="p">)</span>
+            <span class="n">inv</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">mat</span><span class="o">.</span><span class="n">Inverse</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">FreeDofs</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">condense</span><span class="p">),</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">Apply</span> <span class="p">(</span><span class="n">gfsol</span><span class="o">.</span><span class="n">vec</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">condense</span><span class="p">:</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">a</span><span class="o">.</span><span class="n">harmonic_extension_trans</span> <span class="o">*</span> <span class="n">res</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">inv</span><span class="o">*</span><span class="n">res</span>
+            <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">condense</span><span class="p">:</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">a</span><span class="o">.</span><span class="n">harmonic_extension</span> <span class="o">*</span> <span class="n">w</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">a</span><span class="o">.</span><span class="n">inner_solve</span> <span class="o">*</span> <span class="n">res</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="n">InnerProduct</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+            <span class="c1"># print (&quot;err^2 = &quot;, err)</span>
+                                                
+            <span class="n">gfsol</span><span class="o">.</span><span class="n">vec</span><span class="o">.</span><span class="n">data</span> <span class="o">-=</span> <span class="n">w</span>
+            
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-20</span><span class="p">:</span>
+                <span class="k">break</span><span class="p">;</span>
+            
+        <span class="n">scene</span><span class="o">.</span><span class="n">Redraw</span><span class="p">()</span>
+  
+<span class="c1"># gfsol.Save(&quot;fsisol4.sol&quot;)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "661207921302451a986147f55b8a48b2"}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.005
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.01
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0149999999999997
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0199999999999996
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0249999999999995
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0299999999999994
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0349999999999993
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.039999999999999
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.044999999999999
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.049999999999999
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.054999999999999
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0599999999999987
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0649999999999986
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0699999999999985
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0749999999999984
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.0799999999999983
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.084999999999998
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.089999999999998
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.094999999999998
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.099999999999998
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1049999999999978
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1099999999999977
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1149999999999975
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1199999999999974
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1249999999999973
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1299999999999972
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.134999999999997
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.139999999999997
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.144999999999997
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.149999999999997
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1549999999999967
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1599999999999966
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1649999999999965
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1699999999999964
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1749999999999963
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.179999999999996
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.184999999999996
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.189999999999996
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.194999999999996
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.1999999999999957
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2049999999999956
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2099999999999955
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2149999999999954
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2199999999999953
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.224999999999995
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.229999999999995
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.234999999999995
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.239999999999995
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2449999999999948
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2499999999999947
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2549999999999946
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2599999999999945
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2649999999999944
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2699999999999942
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.274999999999994
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.279999999999994
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.284999999999994
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.289999999999994
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2949999999999937
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.2999999999999936
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3049999999999935
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3099999999999934
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3149999999999933
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.319999999999993
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.324999999999993
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.329999999999993
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.334999999999993
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3399999999999928
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3449999999999926
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3499999999999925
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3549999999999924
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3599999999999923
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.364999999999992
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.369999999999992
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.374999999999992
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.379999999999992
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.384999999999992
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3899999999999917
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3949999999999916
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.3999999999999915
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4049999999999914
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4099999999999913
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.414999999999991
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.419999999999991
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.424999999999991
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.429999999999991
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4349999999999907
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4399999999999906
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4449999999999905
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4499999999999904
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4549999999999903
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.45999999999999
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.46499999999999
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.46999999999999
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.47499999999999
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4799999999999898
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4849999999999897
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4899999999999896
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4949999999999894
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.4999999999999893
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5049999999999892
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.509999999999989
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.514999999999989
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.519999999999989
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.524999999999989
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5299999999999887
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5349999999999886
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5399999999999885
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5449999999999884
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5499999999999883
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.554999999999988
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.559999999999988
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.564999999999988
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.569999999999988
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5749999999999877
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5799999999999876
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5849999999999875
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5899999999999874
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.5949999999999873
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.599999999999987
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.604999999999987
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.609999999999987
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.614999999999987
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.619999999999987
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6249999999999867
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6299999999999866
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6349999999999865
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6399999999999864
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6449999999999863
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.649999999999986
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.654999999999986
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.659999999999986
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.664999999999986
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6699999999999857
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6749999999999856
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6799999999999855
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6849999999999854
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.6899999999999853
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.694999999999985
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.699999999999985
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.704999999999985
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.709999999999985
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7149999999999848
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7199999999999847
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7249999999999845
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7299999999999844
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7349999999999843
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7399999999999842
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.744999999999984
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.749999999999984
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.754999999999984
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.759999999999984
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7649999999999837
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7699999999999836
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7749999999999835
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7799999999999834
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.7849999999999833
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.789999999999983
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.794999999999983
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.799999999999983
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.804999999999983
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8099999999999827
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8149999999999826
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8199999999999825
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8249999999999824
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8299999999999823
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.834999999999982
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.839999999999982
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.844999999999982
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.849999999999982
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8549999999999818
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8599999999999817
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8649999999999816
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8699999999999815
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8749999999999813
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.8799999999999812
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.884999999999981
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.889999999999981
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Applications/Netgen.app/Contents/Resources/lib/python3.13/site-packages/netgen/webgui.py:20: RuntimeWarning: overflow encountered in cast
+  values = np.array(data.flatten(), dtype=dtype)
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.894999999999981
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>t =  3.899999999999981
+</pre></div>
+</div>
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">NgException</span><span class="g g-Whitespace">                               </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">18</span>
+<span class="g g-Whitespace">     </span><span class="mi">16</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+<span class="g g-Whitespace">     </span><span class="mi">17</span>     <span class="n">gfset</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="n">gfsol</span><span class="o">.</span><span class="n">components</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="ne">---&gt; </span><span class="mi">18</span>     <span class="n">a</span><span class="o">.</span><span class="n">AssembleLinearization</span><span class="p">(</span><span class="n">gfsol</span><span class="o">.</span><span class="n">vec</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">19</span>     <span class="n">inv</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">mat</span><span class="o">.</span><span class="n">Inverse</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">space</span><span class="o">.</span><span class="n">FreeDofs</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">condense</span><span class="p">),</span> <span class="n">inverse</span><span class="o">=</span><span class="n">inverse</span><span class="p">)</span>
+<span class="g g-Whitespace">     </span><span class="mi">20</span>     <span class="n">a</span><span class="o">.</span><span class="n">Apply</span> <span class="p">(</span><span class="n">gfsol</span><span class="o">.</span><span class="n">vec</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+
+<span class="ne">NgException</span>: Inverse matrix: Matrix singularin AssembleLinearization
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./advanced"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="morphing.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">11. </span>N.-St. on moving domains</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By J. Schöberl
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2022.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
